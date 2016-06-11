@@ -1,6 +1,6 @@
 # `grab-mac-link.el`
 
-Grab link from Mac Apps and insert it into Emacs as plain, markdown or org link, e.g.,
+Grab link from Mac Apps and insert it into Emacs as plain, Markdown or Org link, e.g.,
 
     Plain:    https://www.wikipedia.org/
     Markdown: [Wikipedia](https://www.wikipedia.org/)

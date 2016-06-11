@@ -1,4 +1,4 @@
-;;; grab-mac-link.el --- Grab the url of the frontmost tab in the frontmost window in Mac Apps  -*- lexical-binding: t; -*-
+;;; grab-mac-link.el --- Grab link from Mac Apps and insert it into Emacs  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2016 Free Software Foundation, Inc.
 ;; Copyright (C) 2016  Chunyang Xu

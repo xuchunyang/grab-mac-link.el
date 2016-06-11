@@ -78,4 +78,4 @@ and so on...
 
 ## Acknowledgment
 
-AppleScript code used in this program is borrowed from `org-mac-link.el`.
+AppleScript code used in this program is borrowed from [`org-mac-link.el`](http://orgmode.org/worg/org-contrib/org-mac-link.html).

@@ -1,6 +1,10 @@
 # `grab-mac-link.el`
 
-Grab link from Mac Apps and insert it into Emacs as plain, markdown or org link.
+Grab link from Mac Apps and insert it into Emacs as plain, markdown or org link, e.g.,
+
+    Plain:    https://www.wikipedia.org/
+    Markdown: [Wikipedia](https://www.wikipedia.org/)
+    Org:      [[https://www.wikipedia.org/][Wikipedia]]
 
 ## Supported Apps
 
@@ -71,3 +75,7 @@ and so on...
 (grab-mac-link-mail-1)
     ⇒ ("message://HjOnDbgYiWfDDNcbF-rbtw@notifications.google.com" "New sign-in from iPad")
 ```
+
+## Acknowledgment
+
+AppleScript code used in this program is borrowed from `org-mac-link.el`.

@@ -76,6 +76,13 @@ and so on...
     ⇒ ("message://HjOnDbgYiWfDDNcbF-rbtw@notifications.google.com" "New sign-in from iPad")
 ```
 
+### `(grab-mac-link-terminal-1)`
+
+``` emacs-lisp
+(grab-mac-link-terminal-1)
+    ⇒ ("/Users/xcy/Projects/emacs" "终端")
+```
+
 ## Acknowledgment
 
 AppleScript code used in this program is borrowed from [`org-mac-link.el`](http://orgmode.org/worg/org-contrib/org-mac-link.html).

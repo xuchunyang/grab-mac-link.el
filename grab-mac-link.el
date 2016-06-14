@@ -268,13 +268,24 @@ When done, go grab the link, and insert it at point."
          '((?p . "grab-mac-link-%s")
            (?m . "grab-mac-link-%s-as-markdown-link")
            (?o . "grab-mac-link-%s-as-org-link")))
+        (propertize-menu
+         (lambda (string)
+           "Propertize substring between [] in STRING."
+           (with-temp-buffer
+             (insert string)
+             (goto-char 1)
+             (while (re-search-forward "\\[\\(.+?\\)\\]" nil 'no-error)
+               (replace-match (format "[%s]" (propertize (match-string 1) 'face 'bold))))
+             (buffer-string))))
         input grab-function)
 
-    (message "[c]hrome [s]afari [f]irefox [F]inder [m]ail:" )
+    (message (funcall propertize-menu
+                      "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail:"))
     (setq input (read-char-exclusive))
     (setq app (cdr (assq input apps)))
 
-    (message "Grab link from %s as a [p]lain [m]arkdown [o]rg link:" app)
+    (message (funcall propertize-menu
+                      (format "Grab link from %s as a [p]lain [m]arkdown [o]rg link:" app)))
     (setq input (read-char-exclusive))
     (setq grab-function (intern (format (cdr (assq input actions)) app)))
 

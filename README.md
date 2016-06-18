@@ -1,5 +1,8 @@
 # `grab-mac-link.el`
 
+[![MELPA](https://melpa.org/packages/grab-mac-link-badge.svg)](https://melpa.org/#/grab-mac-link)
+[![MELPA Stable](https://stable.melpa.org/packages/grab-mac-link-badge.svg)](https://stable.melpa.org/#/grab-mac-link)
+
 Grab link from Mac Apps.
 
 ## Supported Apps

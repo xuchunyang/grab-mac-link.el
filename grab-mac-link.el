@@ -38,18 +38,29 @@
 ;; The code of `grab-mac-link.el' is inspired by `org-mac-link.el'
 ;;
 ;; The following applications are supportted:
-;; - Google Chrome.app
-;; - Safari.app
-;; - Firefox.app
-;; - Finder.app
-;; - Mail.app
+;; - Chrome
+;; - Safari
+;; - Firefox
+;; - Finder
+;; - Mail
+;; - Terminal
 ;;
-;; To use, type M-x grab-mac-link
+;; The following link types are supported:
+;; - plain:    https://www.wikipedia.org/
+;; - markdonw: [Wikipedia](https://www.wikipedia.org/)
+;; - org:      [[https://www.wikipedia.org/][Wikipedia]]
+;;
+;; To use, type M-x grab-mac-link or call `grab-mac-link' from lisp
+;;
+;;   (grab-mac-link APP &optional LINK-TYPE)
 
 ;;; Code:
 
 (defun grab-mac-link-split (as-link)
   (split-string as-link "::split::"))
+
+(defun grab-mac-link-make-plain-link (url name)
+  url)
 
 (defun grab-mac-link-make-org-link (url name)
   (require 'org)
@@ -78,21 +89,6 @@
     (grab-mac-link-split
      (replace-regexp-in-string
       "^\"\\|\"$" "" (car (split-string result "[\r\n]+" t))))))
-
-;;;###autoload
-(defun grab-mac-link-chrome ()
-  (interactive)
-  (insert (car (grab-mac-link-chrome-1))))
-
-;;;###autoload
-(defun grab-mac-link-chrome-as-markdown-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-markdown-link (grab-mac-link-chrome-1))))
-
-;;;###autoload
-(defun grab-mac-link-chrome-as-org-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-org-link (grab-mac-link-chrome-1))))
 
 
 ;; Firefox.app
@@ -123,21 +119,6 @@
     (grab-mac-link-split
      (car (split-string result "[\r\n]+" t)))))
 
-;;;###autoload
-(defun grab-mac-link-firefox ()
-  (interactive)
-  (insert (car (grab-mac-link-firefox-1))))
-
-;;;###autoload
-(defun grab-mac-link-firefox-as-markdown-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-markdown-link (grab-mac-link-firefox-1))))
-
-;;;###autoload
-(defun grab-mac-link-firefox-as-org-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-org-link (grab-mac-link-firefox-1))))
-
 
 ;; Safari.app
 
@@ -150,21 +131,6 @@
      "	set theName to the name of the document 1\n"
      "	return theUrl & \"::split::\" & theName\n"
      "end tell\n"))))
-
-;;;###autoload
-(defun grab-mac-link-safari ()
-  (interactive)
-  (insert (car (grab-mac-link-safari-1))))
-
-;;;###autoload
-(defun grab-mac-link-safari-as-markdown-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-markdown-link (grab-mac-link-safari-1))))
-
-;;;###autoload
-(defun grab-mac-link-safari-as-org-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-org-link (grab-mac-link-safari-1))))
 
 
 ;; Finder.app
@@ -182,21 +148,6 @@
      " end repeat\n"
      " return links as string\n"
      "end tell\n"))))
-
-;;;###autoload
-(defun grab-mac-link-finder ()
-  (interactive)
-  (insert (car (grab-mac-link-finder-1))))
-
-;;;###autoload
-(defun grab-mac-link-finder-as-markdown-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-markdown-link (grab-mac-link-finder-1))))
-
-;;;###autoload
-(defun grab-mac-link-finder-as-org-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-org-link (grab-mac-link-finder-1))))
 
 
 ;; Mail.app
@@ -221,21 +172,6 @@
      "return theLinkList as string\n"
      "end tell"))))
 
-;;;###autoload
-(defun grab-mac-link-mail ()
-  (interactive)
-  (insert (car (grab-mac-link-mail-1))))
-
-;;;###autoload
-(defun grab-mac-link-mail-as-markdown-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-markdown-link (grab-mac-link-mail-1))))
-
-;;;###autoload
-(defun grab-mac-link-mail-as-org-link ()
-  (interactive)
-  (insert (apply #'grab-mac-link-make-org-link (grab-mac-link-mail-1))))
-
 
 ;; Terminal.app
 
@@ -254,43 +190,58 @@
 ;; One Entry point for all
 
 ;;;###autoload
-(defun grab-mac-link ()
+(defun grab-mac-link (app &optional link-type)
   "Prompt for an application to grab a link from.
-When done, go grab the link, and insert it at point."
-  (interactive)
-  (let ((apps
-         '((?c . chrome)
-           (?s . safari)
-           (?f . firefox)
-           (?F . finder)
-           (?m . mail)))
-        (actions
-         '((?p . "grab-mac-link-%s")
-           (?m . "grab-mac-link-%s-as-markdown-link")
-           (?o . "grab-mac-link-%s-as-org-link")))
-        (propertize-menu
-         (lambda (string)
-           "Propertize substring between [] in STRING."
-           (with-temp-buffer
-             (insert string)
-             (goto-char 1)
-             (while (re-search-forward "\\[\\(.+?\\)\\]" nil 'no-error)
-               (replace-match (format "[%s]" (propertize (match-string 1) 'face 'bold))))
-             (buffer-string))))
-        input grab-function)
+When done, go grab the link, and insert it at point.
 
-    (message (funcall propertize-menu
-                      "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail:"))
-    (setq input (read-char-exclusive))
-    (setq app (cdr (assq input apps)))
+If called from lisp, grab link from APP and return it (as a
+string) with LINK-TYPE.  APP is a symbol and must be one of
+'(chrome safari finder mail terminal), LINK-TYPE is also a symbol
+and must be one of '(plain markdown org), if LINK-TYPE is omitted
+or nil, plain link will be used."
+  (interactive
+   (let ((apps
+          '((?c . chrome)
+            (?s . safari)
+            (?f . firefox)
+            (?F . finder)
+            (?m . mail)
+            (?t . terminal)))
+         (link-types
+          '((?p . plain)
+            (?m . markdown)
+            (?o . org)))
+         (propertize-menu
+          (lambda (string)
+            "Propertize substring between [] in STRING."
+            (with-temp-buffer
+              (insert string)
+              (goto-char 1)
+              (while (re-search-forward "\\[\\(.+?\\)\\]" nil 'no-error)
+                (replace-match (format "[%s]" (propertize (match-string 1) 'face 'bold))))
+              (buffer-string))))
+         input app link-type)
 
-    (message (funcall propertize-menu
-                      (format "Grab link from %s as a [p]lain [m]arkdown [o]rg link:" app)))
-    (setq input (read-char-exclusive))
-    (setq grab-function (intern (format (cdr (assq input actions)) app)))
+     (message (funcall propertize-menu
+                       "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail [t]erminal:"))
+     (setq input (read-char-exclusive))
+     (setq app (cdr (assq input apps)))
 
-    (when grab-function
-      (call-interactively grab-function))))
+     (message (funcall propertize-menu
+                       (format "Grab link from %s as a [p]lain [m]arkdown [o]rg link:" app)))
+     (setq input (read-char-exclusive))
+     (setq link-type (cdr (assq input link-types)))
+     (list app link-type)))
+
+  (setq link-type (or link-type 'plain))
+  (unless (and (memq app '(chrome safari finder mail terminal))
+               (memq link-type '(plain org markdown)))
+    (error "Unknown app %s or link-type %s" app link-type))
+  (let* ((grab-link-func (intern (format "grab-mac-link-%s-1" app)))
+         (make-link-func (intern (format "grab-mac-link-make-%s-link" link-type)))
+         (link (apply make-link-func (funcall grab-link-func))))
+    (and (called-interactively-p 'any) (insert link))
+    link))
 
 (provide 'grab-mac-link)
 ;;; grab-mac-link.el ends here

@@ -13,6 +13,7 @@ Grab link from Mac Apps.
 - Finder
 - Mail
 - Terminal
+- [Skim](http://skim-app.sourceforge.net/)
 
 ## Supported Link types
 

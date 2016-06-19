@@ -44,6 +44,7 @@
 ;; - Finder
 ;; - Mail
 ;; - Terminal
+;; - Skim
 ;;
 ;; The following link types are supported:
 ;; - plain:    https://www.wikipedia.org/
@@ -62,8 +63,46 @@
 (defun grab-mac-link-make-plain-link (url name)
   url)
 
-(defun grab-mac-link-make-org-link (url name)
+(defvar grab-mac-link-org-setup-p nil)
+
+(defun grab-mac-link-org-setup ()
   (require 'org)
+  (unless (require 'org-mac-link nil 'no-error)
+    ;; Handle links from Skim.app
+    ;;
+    ;; Original code & idea by Christopher Suckling (org-mac-protocol)
+
+    (org-add-link-type "skim" 'org-mac-skim-open)
+
+    (defun org-mac-skim-open (uri)
+      "Visit page of pdf in Skim"
+      (let* ((page (when (string-match "::\\(.+\\)\\'" uri)
+                     (match-string 1 uri)))
+             (document (substring uri 0 (match-beginning 0))))
+        (do-applescript
+         (concat
+          "tell application \"Skim\"\n"
+          "activate\n"
+          "set theDoc to \"" document "\"\n"
+          "set thePage to " page "\n"
+          "open theDoc\n"
+          "go document 1 to page thePage of document 1\n"
+          "end tell"))))
+
+    ;; Handle links from Mail.app
+
+    (org-add-link-type "message" 'org-mac-message-open)
+
+    (defun org-mac-message-open (message-id)
+      "Visit the message with MESSAGE-ID.
+This will use the command `open' with the message URL."
+      (start-process (concat "open message:" message-id) nil
+                     "open" (concat "message://<" (substring message-id 2) ">")))))
+
+(defun grab-mac-link-make-org-link (url name)
+  (unless grab-mac-link-org-setup-p
+    (setq grab-mac-link-org-setup-p t)
+    (grab-mac-link-org-setup))
   (org-make-link-string url name))
 
 (defun grab-mac-link-make-markdown-link (url name)
@@ -187,6 +226,27 @@
      "end tell"))))
 
 
+;; Skim.app
+(defun grab-mac-link-skim-1 ()
+  (grab-mac-link-split
+   (do-applescript
+    (concat
+     "tell application \"Skim\"\n"
+     "set theDoc to front document\n"
+     "set theTitle to (name of theDoc)\n"
+     "set thePath to (path of theDoc)\n"
+     "set thePage to (get index for current page of theDoc)\n"
+     "set theSelection to selection of theDoc\n"
+     "set theContent to contents of (get text for theSelection)\n"
+     "if theContent is missing value then\n"
+     "    set theContent to theTitle & \", p. \" & thePage\n"
+     "end if\n"
+     "set theLink to \"skim://\" & thePath & \"::\" & thePage & "
+     "\"::split::\" & theContent\n"
+     "end tell\n"
+     "return theLink as string\n"))))
+
+
 ;; One Entry point for all
 
 ;;;###autoload
@@ -206,7 +266,8 @@ or nil, plain link will be used."
             (?f . firefox)
             (?F . finder)
             (?m . mail)
-            (?t . terminal)))
+            (?t . terminal)
+            (?S . skim)))
          (link-types
           '((?p . plain)
             (?m . markdown)
@@ -223,7 +284,7 @@ or nil, plain link will be used."
          input app link-type)
 
      (message (funcall propertize-menu
-                       "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail [t]erminal:"))
+                       "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail [t]erminal [S]kim:"))
      (setq input (read-char-exclusive))
      (setq app (cdr (assq input apps)))
 
@@ -234,7 +295,7 @@ or nil, plain link will be used."
      (list app link-type)))
 
   (setq link-type (or link-type 'plain))
-  (unless (and (memq app '(chrome safari finder mail terminal))
+  (unless (and (memq app '(chrome safari firefox finder mail terminal skim))
                (memq link-type '(plain org markdown)))
     (error "Unknown app %s or link-type %s" app link-type))
   (let* ((grab-link-func (intern (format "grab-mac-link-%s-1" app)))

@@ -15,7 +15,7 @@
 
 ;; Author: Chunyang Xu <xuchunyang.me@gmail.com>
 ;; URL: https://github.com/xuchunyang/grab-mac-link.el
-;; Version: 0.0
+;; Version: 0.1
 ;; Package-Requires: ((emacs "24"))
 ;; Keywords: Markdown, mac, hyperlink
 ;; Created: Sat Jun 11 15:07:18 CST 2016

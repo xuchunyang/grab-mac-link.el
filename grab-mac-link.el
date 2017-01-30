@@ -254,6 +254,10 @@ This will use the command `open' with the message URL."
   "Prompt for an application to grab a link from.
 When done, go grab the link, and insert it at point.
 
+With a prefix argument, instead of \"insert\", save it to
+kill-ring. For org link, save it to `org-stored-links', then
+later you can insert it via `org-insert-link'.
+
 If called from lisp, grab link from APP and return it (as a
 string) with LINK-TYPE.  APP is a symbol and must be one of
 '(chrome safari finder mail terminal), LINK-TYPE is also a symbol
@@ -301,7 +305,15 @@ or nil, plain link will be used."
   (let* ((grab-link-func (intern (format "grab-mac-link-%s-1" app)))
          (make-link-func (intern (format "grab-mac-link-make-%s-link" link-type)))
          (link (apply make-link-func (funcall grab-link-func))))
-    (and (called-interactively-p 'any) (insert link))
+    (when (called-interactively-p 'any)
+      (if current-prefix-arg
+          (if (eq link-type 'org)
+              (let* ((res (funcall grab-link-func))
+                     (link (first res))
+                     (desc (second res)))
+                (push (list link desc) org-stored-links))
+            (kill-new link))
+        (insert link)))
     link))
 
 (provide 'grab-mac-link)

@@ -316,8 +316,10 @@ or nil, plain link will be used."
               (let* ((res (funcall grab-link-func))
                      (link (car res))
                      (desc (cadr res)))
-                (push (list link desc) org-stored-links))
-            (kill-new link))
+                (push (list link desc) org-stored-links)
+                (message "Stored: %s" desc))
+            (kill-new link)
+            (message "Copied: %s" link))
         (insert link)))
     link))
 

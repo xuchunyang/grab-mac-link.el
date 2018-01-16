@@ -299,14 +299,14 @@ or nil, plain link will be used."
                 (replace-match (format "[%s]" (propertize (match-string 1) 'face 'bold))))
               (buffer-string))))
          input app link-type)
-
-     (message (funcall propertize-menu
-                       "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail [t]erminal [S]kim:"))
+     (let ((message-log-max nil))
+       (message (funcall propertize-menu
+                         "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail [t]erminal [S]kim:")))
      (setq input (read-char-exclusive))
      (setq app (cdr (assq input apps)))
-
-     (message (funcall propertize-menu
-                       (format "Grab link from %s as a [p]lain [m]arkdown [o]rg link:" app)))
+     (let ((message-log-max nil))
+       (message (funcall propertize-menu
+                         (format "Grab link from %s as a [p]lain [m]arkdown [o]rg link:" app))))
      (setq input (read-char-exclusive))
      (setq link-type (cdr (assq input link-types)))
      (list app link-type)))

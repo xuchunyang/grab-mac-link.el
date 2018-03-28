@@ -329,5 +329,24 @@ or nil, plain link will be used."
         (insert link)))
     link))
 
+;; NOTE A good idea is to use most recent application, however I don't know how
+;; to get such information.
+(defvar grab-mac-link-dwim-favourite-app nil)
+
+;;;###autoload
+(defun grab-mac-link-dwim (app)
+  (interactive
+   (list
+    (or
+     (and (not current-prefix-arg) grab-mac-link-dwim-favourite-app)
+     (intern (completing-read "Application: "
+                              '(chrome safari firefox finder mail terminal skim)
+                              nil t)))))
+  (let ((link-type (cond
+                    ((memq major-mode '(markdown-mode gfm-mode)) 'markdown)
+                    ((eq major-mode 'org-mode) 'org)
+                    (t 'plain))))
+    (insert (grab-mac-link app link-type))))
+
 (provide 'grab-mac-link)
 ;;; grab-mac-link.el ends here

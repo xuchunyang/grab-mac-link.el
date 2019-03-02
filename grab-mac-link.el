@@ -63,6 +63,11 @@
 (defun grab-mac-link-split (as-link)
   (split-string as-link "::split::"))
 
+(defun grab-mac-link-unquote (s)
+  (if (string-prefix-p "\"" s)
+      (substring s 1 -1)
+    s))
+
 (defun grab-mac-link-make-plain-link (url _name)
   url)
 
@@ -167,13 +172,14 @@ This will use the command `open' with the message URL."
 
 (defun grab-mac-link-safari-1 ()
   (grab-mac-link-split
-   (do-applescript
-    (concat
-     "tell application \"Safari\"\n"
-     "	set theUrl to URL of document 1\n"
-     "	set theName to the name of the document 1\n"
-     "	return theUrl & \"::split::\" & theName\n"
-     "end tell\n"))))
+   (grab-mac-link-unquote
+    (do-applescript
+     (concat
+      "tell application \"Safari\"\n"
+      "	set theUrl to URL of document 1\n"
+      "	set theName to the name of the document 1\n"
+      "	return theUrl & \"::split::\" & theName\n"
+      "end tell\n")))))
 
 
 ;; Finder.app

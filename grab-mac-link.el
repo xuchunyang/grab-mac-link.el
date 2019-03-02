@@ -233,14 +233,15 @@ If there is none, return nil."
 
 (defun grab-mac-link-terminal-1 ()
   (grab-mac-link-split
-   (do-applescript
-    (concat
-     "tell application \"Terminal\"\n"
-     "  set theName to custom title in tab 1 of window 1\n"
-     "  do script \"pwd | pbcopy\" in window 1\n"
-     "  set theUrl to do shell script \"pbpaste\"\n"
-     "  return theUrl & \"::split::\" & theName\n"
-     "end tell"))))
+   (grab-mac-link-unquote
+    (do-applescript
+     (concat
+      "tell application \"Terminal\"\n"
+      "  set theName to custom title in tab 1 of window 1\n"
+      "  do script \"pwd | pbcopy\" in window 1\n"
+      "  set theUrl to do shell script \"pbpaste\"\n"
+      "  return theUrl & \"::split::\" & theName\n"
+      "end tell")))))
 
 
 ;; Skim.app

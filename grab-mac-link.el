@@ -15,7 +15,7 @@
 
 ;; Author: Xu Chunyang
 ;; URL: https://github.com/xuchunyang/grab-mac-link.el
-;; Version: 0.2
+;; Version: 0.3
 ;; Package-Requires: ((emacs "24"))
 ;; Keywords: mac, hyperlink
 ;; Created: Sat Jun 11 15:07:18 CST 2016

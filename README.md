@@ -50,6 +50,16 @@ Grab link from App and return it in LINK-TYPE.
     ⇒ "/Users/xcy/.emacs.d"
 ```
 
+### `M-x grab-mac-link-dwim`
+
+Choose an application according to `grab-mac-link-dwim-favourite-app` and link
+type according to the current buffer's major mode, i.e., `major-mode`. For
+example, if you use Chrome a lot, you may want to set this in your init file:
+
+``` emacs-lisp
+(setq grab-mac-link-dwim-favourite-app 'chrome)
+```
+
 ## Acknowledgment
 
 AppleScript code used in this program is borrowed from [`org-mac-link.el`](http://orgmode.org/worg/org-contrib/org-mac-link.html).

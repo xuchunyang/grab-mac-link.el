@@ -20,7 +20,7 @@ Grab link from Mac Apps.
     Plain:    https://www.wikipedia.org/
     Markdown: [Wikipedia](https://www.wikipedia.org/)
     Org:      [[https://www.wikipedia.org/][Wikipedia]]
-
+    HTML:     <a href="https://www.wikipedia.org/">Wikipedia</a>
 
 ## Usage
 

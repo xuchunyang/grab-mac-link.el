@@ -117,6 +117,10 @@ This will use the command `open' with the message URL."
   "Make a Markdown inline link."
   (format "[%s](%s)" name url))
 
+(defun grab-mac-link-make-html-link (url name)
+  "Make an HTML <a> link."
+  (format "<a href=\"%s\">%s</a>" url name))
+
 
 ;; Google Chrome.app
 
@@ -293,7 +297,8 @@ or nil, plain link will be used."
          (link-types
           '((?p . plain)
             (?m . markdown)
-            (?o . org)))
+            (?o . org)
+            (?h . html)))
          (propertize-menu
           (lambda (string)
             "Propertize substring between [] in STRING."
@@ -311,14 +316,14 @@ or nil, plain link will be used."
      (setq app (cdr (assq input apps)))
      (let ((message-log-max nil))
        (message (funcall propertize-menu
-                         (format "Grab link from %s as a [p]lain [m]arkdown [o]rg link:" app))))
+                         (format "Grab link from %s as a [p]lain [m]arkdown [o]rg [h]tml link:" app))))
      (setq input (read-char-exclusive))
      (setq link-type (cdr (assq input link-types)))
      (list app link-type)))
 
   (setq link-type (or link-type 'plain))
   (unless (and (memq app '(chrome safari firefox finder mail terminal skim))
-               (memq link-type '(plain org markdown)))
+               (memq link-type '(plain org markdown html)))
     (error "Unknown app %s or link-type %s" app link-type))
   (let* ((grab-link-func (intern (format "grab-mac-link-%s-1" app)))
          (make-link-func (intern (format "grab-mac-link-make-%s-link" link-type)))
@@ -350,8 +355,9 @@ or nil, plain link will be used."
                               '(chrome safari firefox finder mail terminal skim)
                               nil t)))))
   (let ((link-type (cond
-                    ((memq major-mode '(markdown-mode gfm-mode)) 'markdown)
-                    ((eq major-mode 'org-mode) 'org)
+                    ((derived-mode-p 'markdown-mode) 'markdown)
+                    ((derived-mode-p 'org-mode)      'org)
+                    ((derived-mode-p 'html-mode)     'html)
                     (t 'plain))))
     (insert (grab-mac-link app link-type))))
 

@@ -43,6 +43,7 @@
 ;; - Mail
 ;; - Terminal
 ;; - Skim
+;; - qutebrowser
 ;;
 ;; The following link types are supported:
 ;; - plain:    https://www.wikipedia.org/
@@ -274,6 +275,42 @@ If there is none, return nil."
      "return theLink as string\n"))))
 
 
+;; qutebrowser.app
+
+(defun grab-mac-link-qutebrowser-1 ()
+  (let ((result
+         (do-applescript
+          (concat
+           "set oldClipboard to the clipboard\n"
+           "set frontmostApplication to path to frontmost application\n"
+           "tell application \"qutebrowser\"\n"
+           "	activate\n"
+           "	delay 0.15\n"
+           "	tell application \"System Events\"\n"
+           "		keystroke \"y\"\n"
+           "		keystroke \"y\"\n"
+           "	end tell\n"
+           "	delay 0.15\n"
+           "	set theUrl to the clipboard\n"
+           "	set the clipboard to oldClipboard\n"
+           "	delay 0.15\n"
+           "	tell application \"System Events\"\n"
+           "		keystroke \"y\"\n"
+           "		keystroke \"T\"\n"
+           "	end tell\n"
+           "	delay 0.15\n"
+           "	set theTitle to the clipboard\n"
+           "	set the clipboard to oldClipboard\n"
+	       "    set theResult to (get theUrl) & \"::split::\" & (get theTitle)\n"
+           "end tell\n"
+           "activate application (frontmostApplication as text)\n"
+           "set links to {}\n"
+           "copy theResult to the end of links\n"
+           "return links as string\n"))))
+    (grab-mac-link-split
+     (car (split-string result "[\r\n]+" t)))))
+
+
 ;; One Entry point for all
 
 ;;;###autoload
@@ -298,7 +335,8 @@ or nil, plain link will be used."
             (?F . finder)
             (?m . mail)
             (?t . terminal)
-            (?S . skim)))
+            (?S . skim)
+            (?q . qutebrowser)))
          (link-types
           '((?p . plain)
             (?m . markdown)
@@ -316,7 +354,7 @@ or nil, plain link will be used."
          input app link-type)
      (let ((message-log-max nil))
        (message (funcall propertize-menu
-                         "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail [t]erminal [S]kim:")))
+                         "Grab link from [c]hrome [s]afari [f]irefox [F]inder [m]ail [t]erminal [S]kim [q]utebrowser:")))
      (setq input (read-char-exclusive))
      (setq app (cdr (assq input apps)))
      (let ((message-log-max nil))
@@ -327,7 +365,7 @@ or nil, plain link will be used."
      (list app link-type)))
 
   (setq link-type (or link-type 'plain))
-  (unless (and (memq app '(chrome safari firefox finder mail terminal skim))
+  (unless (and (memq app '(chrome safari firefox finder mail terminal skim qutebrowser))
                (memq link-type '(plain org markdown html)))
     (error "Unknown app %s or link-type %s" app link-type))
   (let* ((grab-link-func (intern (format "grab-mac-link-%s-1" app)))
@@ -357,7 +395,7 @@ or nil, plain link will be used."
     (or
      (and (not current-prefix-arg) grab-mac-link-dwim-favourite-app)
      (intern (completing-read "Application: "
-                              '(chrome safari firefox finder mail terminal skim)
+                              '(chrome safari firefox finder mail terminal skim qutebrowser)
                               nil t)))))
   (let ((link-type (cond
                     ((derived-mode-p 'markdown-mode) 'markdown)

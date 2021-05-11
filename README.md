@@ -14,6 +14,7 @@ Grab link from Mac Apps.
 - Mail
 - Terminal
 - [Skim](http://skim-app.sourceforge.net/)
+- qutebrowser
 
 ## Supported Link types
 
